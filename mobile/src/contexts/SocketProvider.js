@@ -21,8 +21,13 @@ export function SocketProvider({ children }) {
     }
 
     const socket = io(SERVER_URL, {
-      transports: ['websocket'],
+      path: '/socket.io',
+      transports: ['websocket', 'polling'],
+      withCredentials: true,
       autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
       auth: { token }
     });
 

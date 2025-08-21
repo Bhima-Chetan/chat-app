@@ -14,15 +14,37 @@ export function AuthProvider({ children }) {
       try {
         const t = await AsyncStorage.getItem('token');
         const u = await AsyncStorage.getItem('user');
-        if (t && u) {
+        
+        // Clear any corrupt data immediately
+        if (u === 'undefined' || u === 'null' || u === null) {
+          await AsyncStorage.removeItem('user');
+        }
+        
+        if (t && t !== 'undefined' && t !== 'null') {
+          try { api.defaults.headers.common.Authorization = `Bearer ${t}`; } catch {}
           setToken(t);
-          setUser(JSON.parse(u));
+        }
+        
+        if (u && u !== 'undefined' && u !== 'null') {
+          try {
+            const parsed = JSON.parse(u);
+            if (parsed && typeof parsed === 'object' && parsed.id) {
+              setUser(parsed);
+            } else {
+              await AsyncStorage.removeItem('user');
+            }
+          } catch (e) {
+            console.warn('⚠️ Clearing corrupt user data');
+            await AsyncStorage.removeItem('user');
+          }
         }
       } catch (error) {
         console.error('❌ Error loading stored auth data:', error);
-        // Clear potentially corrupted data
-        await AsyncStorage.removeItem('token');
-        await AsyncStorage.removeItem('user');
+        // Clear all potentially corrupted data
+        try {
+          await AsyncStorage.removeItem('token');
+          await AsyncStorage.removeItem('user');
+        } catch {}
       } finally {
         setLoading(false);
       }
@@ -36,6 +58,8 @@ export function AuthProvider({ children }) {
       console.log('✅ Login API response:', res.data);
       setToken(res.data.token);
       setUser(res.data.user);
+      // Immediately set auth header so first navigations work
+      try { api.defaults.headers.common.Authorization = `Bearer ${res.data.token}`; } catch {}
       await AsyncStorage.setItem('token', res.data.token);
       await AsyncStorage.setItem('user', JSON.stringify(res.data.user));
       console.log('✅ Login completed successfully');
@@ -64,6 +88,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     setToken(null);
     setUser(null);
+  try { delete api.defaults.headers.common.Authorization; } catch {}
     await AsyncStorage.removeItem('token');
     await AsyncStorage.removeItem('user');
   };

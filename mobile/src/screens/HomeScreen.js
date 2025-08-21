@@ -20,6 +20,9 @@ export default function HomeScreen({ navigation }) {
     try {
       const res = await api.get('/users');
       setUsers(res.data);
+    } catch (e) {
+      console.warn('⚠️ Failed to load users:', e?.response?.data || e.message);
+      setUsers([]);
     } finally { setLoading(false); }
   };
 
@@ -98,6 +101,11 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.logout} onPress={logout}>Logout</Text>
           </View>
         )}
+        ListEmptyComponent={!loading ? (
+          <View style={{ padding: 24, alignItems: 'center' }}>
+            <Text style={{ color: '#6b7280' }}>No users yet. Pull to refresh.</Text>
+          </View>
+        ) : null}
       />
     </View>
   );

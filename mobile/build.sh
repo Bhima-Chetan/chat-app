@@ -3,8 +3,8 @@
 # Build script for Render deployment
 echo "Building Expo web app for production..."
 
-# Set production environment variable
-export EXPO_PUBLIC_SERVER_URL=https://chat-app-1-kg3e.onrender.com
+# Set production environment variable (Render server URL)
+export EXPO_PUBLIC_SERVER_URL=https://chat-app-jb8r.onrender.com
 
 # Install dependencies
 npm install
