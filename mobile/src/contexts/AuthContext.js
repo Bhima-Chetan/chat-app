@@ -11,13 +11,21 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     (async () => {
-      const t = await AsyncStorage.getItem('token');
-      const u = await AsyncStorage.getItem('user');
-      if (t && u) {
-        setToken(t);
-        setUser(JSON.parse(u));
+      try {
+        const t = await AsyncStorage.getItem('token');
+        const u = await AsyncStorage.getItem('user');
+        if (t && u) {
+          setToken(t);
+          setUser(JSON.parse(u));
+        }
+      } catch (error) {
+        console.error('❌ Error loading stored auth data:', error);
+        // Clear potentially corrupted data
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('user');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     })();
   }, []);
 
