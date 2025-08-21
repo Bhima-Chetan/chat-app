@@ -14,8 +14,8 @@ dotenv.config();
 
 // Render uses dynamic PORT assignment
 const PORT = process.env.PORT || 4000;
-// Allow multiple origins (comma-separated). Fallback sensible defaults for Render/web.
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'https://*.onrender.com,https://localhost,https://127.0.0.1,http://localhost:8081,http://localhost:19006';
+// Allow multiple origins (comma-separated). Prefer explicit domain via env.
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'https://chat-app-1-kg3e.onrender.com';
 // Prefer env, fallback to local dev for convenience
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/chat_app';
 
@@ -53,6 +53,8 @@ app.get('/me', authMiddleware, (req, res) => res.json(req.user));
 
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
+  path: '/socket.io',
+  transports: ['websocket', 'polling'],
   cors: { origin: corsOrigins, credentials: true }
 });
 
