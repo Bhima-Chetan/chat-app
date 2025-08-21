@@ -1,0 +1,12 @@
+version = "2"
+
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "npm start"
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 10
+
+[env]
+NODE_ENV = "production"

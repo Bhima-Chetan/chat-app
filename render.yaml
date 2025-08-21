@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: chat-api
+    env: node
+    rootDir: server
+    plan: free
+    autoDeploy: true
+    buildCommand: npm ci
+    startCommand: node src/index.js
+    envVars:
+      - key: NODE_VERSION
+        value: "18"
+      - key: JWT_SECRET
+        # Replace this in Render dashboard or here with a strong secret
+        value: "CHANGE_ME"
+      - key: MONGO_URI
+        # Paste your MongoDB Atlas connection string (mongodb+srv://...)
+        value: "CHANGE_ME"
+      - key: CLIENT_ORIGIN
+        # Comma-separated origins allowed for CORS (e.g., https://your-web.app,expo)
+        value: "*"
+    # Optionally set health check path if your server responds on '/'
+    healthCheckPath: /
