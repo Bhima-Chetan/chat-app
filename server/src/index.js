@@ -14,13 +14,15 @@ dotenv.config();
 
 // Render uses dynamic PORT assignment
 const PORT = process.env.PORT || 4000;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || '*';
+// Allow multiple origins (comma-separated). Fallback sensible defaults for Render/web.
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'https://*.onrender.com,https://localhost,https://127.0.0.1,http://localhost:8081,http://localhost:19006';
 // Prefer env, fallback to local dev for convenience
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/chat_app';
 
 const app = express();
 
-app.use(cors({ origin: CLIENT_ORIGIN === '*' ? true : CLIENT_ORIGIN.split(','), credentials: true }));
+const corsOrigins = CLIENT_ORIGIN === '*' ? true : CLIENT_ORIGIN.split(',').map(s => s.trim());
+app.use(cors({ origin: corsOrigins, credentials: true }));
 app.use(express.json());
 
 // Add request logging for debugging
@@ -51,7 +53,7 @@ app.get('/me', authMiddleware, (req, res) => res.json(req.user));
 
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
-  cors: { origin: CLIENT_ORIGIN === '*' ? true : CLIENT_ORIGIN.split(','), credentials: true }
+  cors: { origin: corsOrigins, credentials: true }
 });
 
 initSockets(io);
@@ -69,7 +71,7 @@ mongoose.connect(MONGO_URI, {
   console.log(`🌐 Host: ${mongoose.connection.host}`);
   server.listen(PORT, () => {
     console.log(`🚀 Server listening on http://localhost:${PORT}`);
-    console.log(`📡 Socket.IO enabled with CORS: ${CLIENT_ORIGIN}`);
+  console.log(`📡 Socket.IO enabled with CORS: ${CLIENT_ORIGIN}`);
   });
 }).catch(err => {
   console.error('❌ MongoDB connection error:', err.message);
