@@ -23,6 +23,12 @@ const app = express();
 app.use(cors({ origin: CLIENT_ORIGIN === '*' ? true : CLIENT_ORIGIN.split(','), credentials: true }));
 app.use(express.json());
 
+// Add request logging for debugging
+app.use((req, res, next) => {
+  console.log(`🔍 ${new Date().toISOString()} - ${req.method} ${req.path} from ${req.ip}`);
+  next();
+});
+
 app.get('/', (req, res) => res.send({ ok: true, message: 'Chat API is running' }));
 app.get('/health', async (req, res) => {
   try {

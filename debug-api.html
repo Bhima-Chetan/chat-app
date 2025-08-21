@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Chat App API Test</h1>
+    
+    <div>
+        <h2>Server Status:</h2>
+        <button onclick="testServer()">Test Server Connection</button>
+        <pre id="serverResult"></pre>
+    </div>
+    
+    <div>
+        <h2>Register Test:</h2>
+        <button onclick="testRegister()">Test Register API</button>
+        <pre id="registerResult"></pre>
+    </div>
+    
+    <div>
+        <h2>Login Test:</h2>
+        <button onclick="testLogin()">Test Login API</button>
+        <pre id="loginResult"></pre>
+    </div>
+
+    <script>
+        const SERVER_URL = 'http://localhost:4002';
+
+        async function testServer() {
+            const result = document.getElementById('serverResult');
+            try {
+                const response = await fetch(SERVER_URL);
+                const data = await response.text();
+                result.textContent = `✅ Server Response: ${data}`;
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function testRegister() {
+            const result = document.getElementById('registerResult');
+            try {
+                const response = await fetch(`${SERVER_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'testuser',
+                        email: 'test@example.com',
+                        password: 'testpassword'
+                    })
+                });
+                const data = await response.json();
+                result.textContent = `Response: ${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function testLogin() {
+            const result = document.getElementById('loginResult');
+            try {
+                const response = await fetch(`${SERVER_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'testpassword'
+                    })
+                });
+                const data = await response.json();
+                result.textContent = `Response: ${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        // Auto-test server on load
+        window.onload = testServer;
+    </script>
+</body>
+</html>

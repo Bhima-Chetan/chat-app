@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
-import { MotiView, MotiText } from 'moti';
 import api from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketProvider';
@@ -53,41 +52,35 @@ export default function HomeScreen({ navigation }) {
     const isCurrentUser = String(item.id) === String(user?.id);
     
     return (
-      <MotiView
-        from={{ opacity: 0, translateY: 8 }}
-        animate={{ opacity: 1, translateY: 0 }}
-        transition={{ type: 'timing', duration: 400, delay: index * 40 }}
+      <TouchableOpacity 
+        style={styles.row} 
+        onPress={() => navigation.navigate('Chat', { peerId: item.id, username: item.username, conversationId: item.conversationId })}
+        activeOpacity={0.7}
       >
-        <TouchableOpacity 
-          style={styles.row} 
-          onPress={() => navigation.navigate('Chat', { peerId: item.id, username: item.username, conversationId: item.conversationId })}
-          activeOpacity={0.7}
-        >
-          <View style={styles.avatarContainer}>
-            <Avatar name={item.username} size={48} />
-            {item.online && <View style={styles.onlineIndicator} />}
-          </View>
-          
-          <View style={styles.content}>
-            <View style={styles.nameRow}>
-              <Text style={styles.name}>
-                {item.username}{isCurrentUser ? ' (You)' : ''}
-              </Text>
-              {last?.at && (
-                <Text style={styles.time}>{dayjs(last.at).format('HH:mm')}</Text>
-              )}
-            </View>
-            <Text style={styles.preview} numberOfLines={1}>
-              {last ? last.text : 'Start a conversation...'}
+        <View style={styles.avatarContainer}>
+          <Avatar name={item.username} size={48} />
+          {item.online && <View style={styles.onlineIndicator} />}
+        </View>
+        
+        <View style={styles.content}>
+          <View style={styles.nameRow}>
+            <Text style={styles.name}>
+              {item.username}{isCurrentUser ? ' (You)' : ''}
             </Text>
-            {!item.online && item.lastSeen && (
-              <Text style={styles.lastSeen}>
-                Last seen {dayjs(item.lastSeen).fromNow()}
-              </Text>
+            {last?.at && (
+              <Text style={styles.time}>{dayjs(last.at).format('HH:mm')}</Text>
             )}
           </View>
-        </TouchableOpacity>
-      </MotiView>
+          <Text style={styles.preview} numberOfLines={1}>
+            {last ? last.text : 'Start a conversation...'}
+          </Text>
+          {!item.online && item.lastSeen && (
+            <Text style={styles.lastSeen}>
+              Last seen {dayjs(item.lastSeen).fromNow()}
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
     );
   };
 
@@ -100,15 +93,10 @@ export default function HomeScreen({ navigation }) {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListHeaderComponent={() => (
-          <MotiView
-            from={{ opacity: 0, translateY: -8 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 400 }}
-            style={styles.header}
-          >
-            <MotiText style={styles.headerTitle}>Chats</MotiText>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Chats</Text>
             <Text style={styles.logout} onPress={logout}>Logout</Text>
-          </MotiView>
+          </View>
         )}
       />
     </View>
