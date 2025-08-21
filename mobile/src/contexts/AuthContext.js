@@ -21,8 +21,10 @@ export function AuthProvider({ children }) {
         }
         
         if (t && t !== 'undefined' && t !== 'null') {
-          try { api.defaults.headers.common.Authorization = `Bearer ${t}`; } catch {}
           setToken(t);
+          // Set auth header immediately on app start
+          api.defaults.headers.common.Authorization = `Bearer ${t}`;
+          console.log('🔧 Restored token and set API auth header');
         }
         
         if (u && u !== 'undefined' && u !== 'null') {
@@ -56,13 +58,21 @@ export function AuthProvider({ children }) {
     try {
       const res = await api.post('/auth/login', { username, password });
       console.log('✅ Login API response:', res.data);
-      setToken(res.data.token);
-      setUser(res.data.user);
-      // Immediately set auth header so first navigations work
-      try { api.defaults.headers.common.Authorization = `Bearer ${res.data.token}`; } catch {}
-      await AsyncStorage.setItem('token', res.data.token);
-      await AsyncStorage.setItem('user', JSON.stringify(res.data.user));
-      console.log('✅ Login completed successfully');
+      
+      const { token, user: userData } = res.data;
+      
+      // Set state first
+      setToken(token);
+      setUser(userData);
+      
+      // Immediately set auth header for subsequent requests
+      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+      
+      // Store in AsyncStorage for persistence
+      await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('user', JSON.stringify(userData));
+      
+      console.log('✅ Login completed successfully, token set on API client');
     } catch (error) {
       console.error('❌ Login error:', error.response?.data || error.message);
       throw error;
@@ -88,12 +98,12 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     setToken(null);
     setUser(null);
-  try { delete api.defaults.headers.common.Authorization; } catch {}
+    // Clear auth header
+    delete api.defaults.headers.common.Authorization;
     await AsyncStorage.removeItem('token');
     await AsyncStorage.removeItem('user');
-  };
-
-  return (
+    console.log('🔄 Logged out and cleared API auth header');
+  };  return (
     <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
